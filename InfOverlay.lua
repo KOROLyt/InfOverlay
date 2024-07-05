@@ -48,6 +48,8 @@ util.require_natives(1640181023)
 
 --global
 local GlobalplayerBD = 2657971
+local gta_version = "1.69"
+local need_update = NETWORK._GET_ONLINE_VERSION() ~= gta_version
 
 --client resolution/aspect ratio
 local RES_X, RES_Y = 1920, 1080
@@ -292,10 +294,14 @@ while true do
             local my_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
             local my_pos = players.get_position(players.user())
             local player_pos
-            if memory.read_byte(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 11)) == 1 then
-                player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 12))
-            elseif memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 6)) ~= -1 then
-                player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 7))
+            if not need_update then
+                if memory.read_byte(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 11)) == 1 then
+                    player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 12))
+                elseif memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 6)) ~= -1 then
+                    player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 7))
+                else
+                    player_pos = players.get_position(pid)
+                end
             else
                 player_pos = players.get_position(pid)
             end
