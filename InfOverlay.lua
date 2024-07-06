@@ -82,6 +82,7 @@ local spacing = 3/RES_Y
 local gui_w = 290/RES_X
 local bar_w_mult = 1.8
 local blip_size = 0.0035
+local my_blip_size = 0.0028
 
 --settings text sizing & spacing
 local name_size = 0.52
@@ -191,6 +192,9 @@ end)
 menu.slider_float(element_dim, "Blip Size", {}, "Size of the map blip.", 0, math.floor(3 * blip_size * 10000), math.floor(blip_size * 10000), 1, function(on_change)
     blip_size = on_change/10000
 end)
+menu.slider_float(element_dim, "Your Blip Size", {}, "Size of the your map blip.", 0, math.floor(3 * my_blip_size * 10000), math.floor(my_blip_size * 10000), 1, function(on_change)
+    my_blip_size = on_change/10000
+end)
 
 --set text sizing & spacing
 local text_dim = menu.list(infoverlay, "Text Sizing & Spacing", {}, "")
@@ -291,17 +295,13 @@ while true do
             local pid = focused[1]
             if render_window then pid = players.user() end
             local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid)
-            local my_ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
+            local my_ped = players.user_ped()
             local my_pos = players.get_position(players.user())
             local player_pos
-            if not need_update then
-                if memory.read_byte(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 11)) == 1 then
-                    player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 12))
-                elseif memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 6)) ~= -1 then
-                    player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 7))
-                else
-                    player_pos = players.get_position(pid)
-                end
+            if not need_update and memory.read_byte(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 11)) == 1 then
+                player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 12))
+            elseif not need_update and memory.read_int(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 6)) ~= -1 then
+                player_pos = v3.new(memory.script_global(GlobalplayerBD + 1 + (pid * 465) + 74 + 7))
             else
                 player_pos = players.get_position(pid)
             end
@@ -478,7 +478,7 @@ while true do
             --my blip
             local blip_dx = ((my_pos.x + 3745)/8316) * map_w
             local blip_dy = (1 - (my_pos.y + 4427)/12689) * gui_h
-            directx.draw_texture(textures.blip, blip_size/1.25, blip_size/1.25, 0.5, 0.5, map_x + padding_x * 2 + bar_w + blip_dx, player_list_y + blip_dy, (360 - my_heading)/360, colour.myblip)
+            directx.draw_texture(textures.blip, my_blip_size, my_blip_size, 0.5, 0.5, map_x + padding_x * 2 + bar_w + blip_dx, player_list_y + blip_dy, (360 - my_heading)/360, colour.myblip)
 
             -------------------------
             -- HEALTH & ARMOUR BAR --
